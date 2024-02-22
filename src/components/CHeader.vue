@@ -1,7 +1,7 @@
 <script setup>
 
 import CMessage from '@/components/CMessage.vue';
-import { emptySelectedList, state } from '@/hooks/useStore.js';
+import { computeList, emptySelectedList, state } from '@/hooks/useStore.js';
 import { reactive } from 'vue';
 
 const tabData = reactive({
@@ -31,6 +31,7 @@ const tabData = reactive({
 
 function switchTab(tab) {
   state.activeTab = tab;
+  computeList(tab.key);
   emptySelectedList();
 }
 
@@ -54,9 +55,4 @@ function switchTab(tab) {
 </template>
 
 <style scoped>
-
-.tab-active {
-  color: #fca5a5;
-  background-color: #f4f4f5;
-}
 </style>

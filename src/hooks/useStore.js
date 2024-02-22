@@ -39,6 +39,7 @@ export function initData() {
  * @param [type] {'text'|'image'|'star'}
  */
 export function computeList(type) {
+  // todo 添加version用于缓存 优化性能
   if (!type || type === 'text') {
     state.textList = state.dataList.filter((item) => item.type === 'text');
   }
