@@ -1,0 +1,17 @@
+{
+  "main": "./index.html",
+  "preload": "./preload.js",
+  "logo": "./assets/logo.png",
+  "development": {
+    "main": "http://localhost:5173/index.html"
+  },
+  "features": [
+    {
+      "code": "hello",
+      "explain": "hello world",
+      "cmds": [
+        "hello"
+      ]
+    }
+  ]
+}
