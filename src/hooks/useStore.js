@@ -83,6 +83,7 @@ export function refreshLabel() {
 }
 
 export function initListener() {
+  if (state.listener) return;
   state.listener = new ClipboardListener({
     onTextChange: (text) => {
       state.dataList.unshift({
@@ -91,6 +92,7 @@ export function initListener() {
         type: 'text',
         length: text.length,
       })
+      computeList('text');
       dbUtil.saveData(state.dataList);
     },
     onImageChange: img => {
@@ -101,6 +103,7 @@ export function initListener() {
         length: img.toPNG().byteLength,
         size: img.getSize(),
       })
+      computeList('image');
       dbUtil.saveData(state.dataList);
     },
   })

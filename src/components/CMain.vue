@@ -2,7 +2,8 @@
 
 import CButton from '@/components/CButton.vue';
 import dbUtil from '@/hooks/dbUtil.js';
-import { computeList, initData, initListener, state, updateSelectedList } from '@/hooks/useStore.js';
+import { computeList, emptySelectedList, initData, initListener, state, updateSelectedList } from '@/hooks/useStore.js';
+import { Empty, message, Modal } from 'ant-design-vue';
 import { computed, onMounted } from 'vue';
 
 // 解构会失去响应式
@@ -46,38 +47,59 @@ const selectItem = (item) => {
 
 function handleCopy(data) {
   state.listener.stop();
-  if (Array.isArray(data)) {
-    const dataType = checkDataType(data);
-    console.log(dataType)
-    if (dataType === 'text') {
-      let res = '';
-      for (let item of data) {
-        res += item.text + '\n';
-      }
-      // 去除末尾换行符
-      res = res.slice(0, -1);
-      clipboard.writeText(res);
-      console.info('复制成功')
-    } else if (dataType === 'image') {
-      const obj = nativeImage.createFromDataURL(data[0].data);
-      clipboard.writeImage(obj);
-    } else {
-      console.error('不支持文本与图片混合复制')
-    }
+  if (data.length === 0) {
+    message.error('请选择至少一条内容');
+    return;
   }
+  const dataType = checkDataType(data);
+  console.log(dataType)
+  if (dataType === 'text') {
+    let res = '';
+    for (let item of data) {
+      res += item.text + '\n';
+    }
+    // 去除末尾换行符
+    res = res.slice(0, -1);
+    clipboard.writeText(res);
+    message.success('复制成功');
+  } else if (dataType === 'image') {
+    message.info('暂不支持多张图片复制，已复制第一张');
+    const obj = nativeImage.createFromDataURL(data[0].data);
+    clipboard.writeImage(obj);
+  } else {
+    message.error('不支持文本与图片混合复制');
+  }
+  emptySelectedList();
   state.listener.start();
 }
 
-function handleStar() {
-  state.selectedList.forEach((item) => {
+function handleStar(data) {
+  if (data.length === 0) {
+    // message.error('请选择至少一条内容');
+    return;
+  }
+  data.forEach((item) => {
     item.star = true
   })
+  message.success('收藏成功');
   computeList('star');
-  console.log(state.dataList);
 }
 
+/**
+ * 清空剪切板
+ */
 function handleEmpty() {
-  dbUtil.removeData();
+  Modal.confirm({
+    title: '确认清空剪切板?',
+    centered: true,
+    width: 300,
+    onOk() {
+      dbUtil.removeData();
+      initData();
+      message.success('清空成功');
+    },
+  });
+
 }
 
 /**
@@ -101,19 +123,21 @@ function checkDataType(data) {
   }
 }
 
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 </script>
 
 <template>
   <main class="flex w-full px-6 py-2">
 
     <section class="list-container flex-1">
+      <a-empty v-if="displayDataList.length === 0" :image="simpleImage" description="暂无数据" class="mt-[20%]" />
       <div
         v-for="item in displayDataList"
         :key="item.id"
         class="relative my-2 px-4 py-2 bg-white border rounded-md cursor-pointer "
         :class="item.selected ? 'border-[#fca5a5]' : ''"
         @click="selectItem(item)"
-        @dblclick="() => {console.log(123)}"
+        @dblclick="handleCopy([item])"
       >
         <template v-if="item.type==='text'">
           <div class="pr-8 max-h-36 whitespace-pre-wrap overflow-hidden">
@@ -134,11 +158,20 @@ function checkDataType(data) {
 
     <section class="action-container m-4 mr-0 w-14 text-center">
       <div class="fixed h-[85vh] flex flex-col align-middle gap-4">
-        <c-button @click="handleCopy(state.selectedList)">copy</c-button>
-        <c-button>paste</c-button>
-        <c-button @click="handleStar">star</c-button>
-        <c-button class="mt-auto" @click="handleEmpty">empty</c-button>
-        <span></span>
+
+        <c-button tooltipTitle="复制" @click="handleCopy(state.selectedList)">
+          <img src="@/assets/copy.svg" alt="" class="m-auto w-10">
+        </c-button>
+
+        <c-button tooltipTitle="粘贴" v-if="false">paste</c-button>
+        <c-button tooltipTitle="收藏" @click="handleStar(state.selectedList)">
+          <img src="@/assets/star.svg" alt="" class="m-auto w-10">
+        </c-button>
+        <c-button tooltipTitle="清空" class="mt-auto" @click="handleEmpty">
+          <img src="@/assets/delete.svg" alt="" class="m-auto w-10">
+        </c-button>
+        <!-- 这个span用来占位的 -->
+        <span class="perch"></span>
       </div>
     </section>
 
