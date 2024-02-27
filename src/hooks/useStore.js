@@ -1,6 +1,7 @@
 import dbUtil from '@/hooks/dbUtil.js';
 import useClipboardListener from '@/hooks/useClipboardListener.js';
 import { reactive } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
 
 const {clipboard} = window;
 const {ClipboardListener} = useClipboardListener(clipboard);
@@ -99,6 +100,7 @@ export function initListener() {
       state.dataList.unshift({
         id: state.dataList.length + 1,
         type: 'image',
+        uid: uuidv4(),
         data: img.toDataURL(),
         length: img.toPNG().byteLength,
         size: img.getSize(),

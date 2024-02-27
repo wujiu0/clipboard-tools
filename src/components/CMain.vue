@@ -63,9 +63,13 @@ function handleCopy(data) {
     clipboard.writeText(res);
     message.success('复制成功');
   } else if (dataType === 'image') {
-    message.info('暂不支持多张图片复制，已复制第一张');
     const obj = nativeImage.createFromDataURL(data[0].data);
     clipboard.writeImage(obj);
+    if (data.length > 1) {
+      message.info('暂不支持多张图片复制，已复制第一张');
+    } else {
+      message.success('复制成功');
+    }
   } else {
     message.error('不支持文本与图片混合复制');
   }
@@ -81,6 +85,7 @@ function handleStar(data) {
   data.forEach((item) => {
     item.star = true
   })
+  emptySelectedList();
   message.success('收藏成功');
   computeList('star');
 }
@@ -160,15 +165,17 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
       <div class="fixed h-[85vh] flex flex-col align-middle gap-4">
 
         <c-button tooltipTitle="复制" @click="handleCopy(state.selectedList)">
-          <img src="@/assets/copy.svg" alt="" class="m-auto w-10">
+          <img src="@/assets/copy.svg" alt="" class="m-auto w-8">
         </c-button>
 
-        <c-button tooltipTitle="粘贴" v-if="false">paste</c-button>
+        <c-button tooltipTitle="粘贴" v-if="false">
+          <img src="@/assets/paste.svg" alt="" class="m-auto w-8">
+        </c-button>
         <c-button tooltipTitle="收藏" @click="handleStar(state.selectedList)">
-          <img src="@/assets/star.svg" alt="" class="m-auto w-10">
+          <img src="@/assets/star.svg" alt="" class="m-auto w-8">
         </c-button>
         <c-button tooltipTitle="清空" class="mt-auto" @click="handleEmpty">
-          <img src="@/assets/delete.svg" alt="" class="m-auto w-10">
+          <img src="@/assets/delete.svg" alt="" class="m-auto w-8">
         </c-button>
         <!-- 这个span用来占位的 -->
         <span class="perch"></span>

@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
+import { visualizer } from 'rollup-plugin-visualizer';
 import Components from 'unplugin-vue-components/vite';
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
 import { defineConfig } from 'vite'
@@ -16,6 +17,10 @@ export default defineConfig({
           },
         ),
       ],
+    }),
+    visualizer({
+      // 打包完成后自动打开浏览器，显示产物体积报告
+      open: true,
     }),
   ],
   resolve: {
