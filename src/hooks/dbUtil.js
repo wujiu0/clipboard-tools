@@ -1,5 +1,5 @@
 import fileUtil from '@/hooks/fileUtil.js';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { toRaw } from 'vue';
 
 const {utools} = window;
