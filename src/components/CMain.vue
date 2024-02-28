@@ -94,16 +94,27 @@ function handleCopy(data) {
   state.listener.start();
 }
 
+/**
+ * 收藏
+ * @param data{array|object}
+ *
+ * array:多条数据，统一加入收藏 object:单条数据，切换收藏状态
+ */
 function handleStar(data) {
-  if (data.length === 0) {
-    // message.error('请选择至少一条内容');
-    return;
+  if (Array.isArray(data) && data.length === 0) {
+    if (data.length === 0) {
+      // message.error('请选择至少一条内容');
+      return;
+    }
+    data.forEach((item) => {
+      item.star = true;
+    })
+    emptySelectedList();
+    message.success('收藏成功');
+  } else if (typeof data === 'object') {
+    data.star = !data.star;
+    data.star && message.success('收藏成功');
   }
-  data.forEach((item) => {
-    item.star = true
-  })
-  emptySelectedList();
-  message.success('收藏成功');
   computeList('star');
 }
 
@@ -181,6 +192,31 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
               @click.stop="toggleUnFold(item)">
           {{ item.unFold ? '⌃收起' : '⌄展开' }}
         </span>
+        <template v-if="state.activeTab.key === 'star'">
+          <a-popconfirm
+            title="取消收藏?"
+            ok-text="是"
+            cancel-text="否"
+            @confirm="handleStar(item)"
+          >
+            <i class="absolute right-7 top-1" @click.stop>
+              <a-tooltip v-if="item.star" title="取消收藏">
+                <img src="@/assets/star_fill.svg" alt="" class="mr-px w-5 cursor-pointer">
+              </a-tooltip>
+            </i>
+          </a-popconfirm>
+        </template>
+        <template v-else>
+            <i class="absolute right-7 top-1" @click.stop="handleStar(item)">
+          <a-tooltip v-if="item.star" title="取消收藏">
+            <img src="@/assets/star_fill.svg" alt="" class="mr-px w-5 cursor-pointer">
+          </a-tooltip>
+          <a-tooltip v-else title="收藏">
+            <img src="@/assets/star.svg" alt="" class="mr-px w-5 cursor-pointer">
+          </a-tooltip>
+        </i>
+        </template>
+
         <i v-if="item.selected"
            class="block absolute right-1 top-1 w-5 h-5 text-center not-italic bg-red-500 text-sm text-white rounded-full"
         >{{ item.selectedIndex }}</i>
