@@ -50,6 +50,19 @@ function switchTab(tab) {
     </div>
     <div class="bg-[#f4f4f5] absolute left-2 w-28 h-12 rounded-t-md pointer-events-none duration-200"
          :style="`transform: translateX(${state.activeTab.id*8}rem)`"></div>
+
+
+    <div v-if="state.selectedList.length"
+         class="bg-[#f4f4f5] flex justify-center items-center w-28 h-12 ml-auto my-0 rounded-t-md">
+      <a-tooltip title="清空所选">
+        <img src="@/assets/clear.svg" alt="" class="mr-px w-7 cursor-pointer" @click="emptySelectedList">
+      </a-tooltip>
+      已选
+      <i class="ml-1 w-4 h-5 text-center not-italic bg-red-500 text-sm text-white rounded-full">
+        {{ state.selectedList.length }}
+      </i>
+    </div>
+
   </header>
   <CMessage />
 </template>

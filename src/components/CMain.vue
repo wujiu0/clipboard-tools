@@ -4,7 +4,7 @@ import CButton from '@/components/CButton.vue';
 import dbUtil from '@/hooks/dbUtil.js';
 import { computeList, emptySelectedList, initData, initListener, state, updateSelectedList } from '@/hooks/useStore.js';
 import { Empty, message, Modal } from 'ant-design-vue';
-import { computed, onMounted } from 'vue';
+import { computed, nextTick, onMounted } from 'vue';
 
 // 解构会失去响应式
 const {selectedList/*, listener*/} = state;
@@ -22,10 +22,27 @@ const displayDataList = computed(() => {
 
 })
 
+function initOverFlow() {
+  debugger
+  state.dataList.forEach((item) => {
+    const el = document.querySelector('#cb-item-' + item.id);
+    const res = el.scrollHeight > el.clientHeight;
+    console.log(item.id, 'initOverFlow', el, res)
+    item.isOverFlow = res;
+  })
+}
+
+function toggleUnFold(item) {
+  item.unFold = !item.unFold;
+}
+
 onMounted(() => {
   console.log('mounted.........')
   initData();
   initListener();
+  nextTick(() => {
+    initOverFlow();
+  })
 });
 
 
@@ -145,16 +162,25 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
         @dblclick="handleCopy([item])"
       >
         <template v-if="item.type==='text'">
-          <div class="pr-8 max-h-36 whitespace-pre-wrap overflow-hidden">
+          <div
+            :id="'cb-item-'+ item.id"
+            class="pr-8 whitespace-pre-wrap"
+            :class="item.isOverFlow && item.unFold ? '': 'line-clamp-6'">
             {{ item.text }}
           </div>
           <span class="text-xs text-gray-400">{{ item.length }}个字符</span>
         </template>
         <template v-else>
-          <img class="max-h-36" :src="item.data" alt="">
+          <div :id="'cb-item-'+ item.id ">
+            <img class="max-h-36" :src="item.data" alt="">
+          </div>
           <span class="text-sm text-gray-400">{{ item.length }}Byte</span>
           <span class="ml-4 text-sm text-gray-400">{{ item.size.width }} x {{ item.size.height }}</span>
         </template>
+        <span class="ml-4 text-sm text-gray-400 float-right hover:text-black" v-if="item.isOverFlow"
+              @click.stop="toggleUnFold(item)">
+          {{ item.unFold ? '⌃收起' : '⌄展开' }}
+        </span>
         <i v-if="item.selected"
            class="block absolute right-1 top-1 w-5 h-5 text-center not-italic bg-red-500 text-sm text-white rounded-full"
         >{{ item.selectedIndex }}</i>
@@ -162,7 +188,7 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
     </section>
 
     <section class="action-container m-4 mr-0 w-14 text-center">
-      <div class="fixed h-[85vh] flex flex-col align-middle gap-4">
+      <div class="fixed h-56 flex flex-col align-middle gap-4">
 
         <c-button tooltipTitle="复制" @click="handleCopy(state.selectedList)">
           <img src="@/assets/copy.svg" alt="" class="m-auto w-8">
@@ -174,11 +200,12 @@ const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
         <c-button tooltipTitle="收藏" @click="handleStar(state.selectedList)">
           <img src="@/assets/star.svg" alt="" class="m-auto w-8">
         </c-button>
+      </div>
+      <!-- 分为两部分减小fixed对滚动的影响-->
+      <div class="fixed bottom-10 h-16 flex flex-col align-middle gap-4">
         <c-button tooltipTitle="清空" class="mt-auto" @click="handleEmpty">
           <img src="@/assets/delete.svg" alt="" class="m-auto w-8">
         </c-button>
-        <!-- 这个span用来占位的 -->
-        <span class="perch"></span>
       </div>
     </section>
 
